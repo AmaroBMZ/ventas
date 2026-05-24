@@ -43,4 +43,11 @@ public class VentaService {
     public void eliminarVenta(Long id) {
         ventaRepository.deleteById(id);
     }
+
+    public Venta obtenerVentaPorId(Long id) {
+
+    return ventaRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+}
+
 }

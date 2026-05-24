@@ -23,17 +23,20 @@ public class VentaController {
     @Autowired
     private VentaService ventaService;
 
-
     @PostMapping
     public Venta postVentas(@RequestBody Venta venta) {
         return ventaService.crearVenta(venta);
-}
+    }
 
     @GetMapping
     public List<Venta> getVenta() {
         return ventaService.obtenerVenta();
     }
 
+    @GetMapping("{id}")
+    public Venta getVentaById(@PathVariable Long id) {
+        return ventaService.obtenerVentaPorId(id);
+    }
 
     @PutMapping("{id}")
     public Venta putVenta(@PathVariable Long id, @RequestBody Venta venta) {
@@ -44,5 +47,4 @@ public class VentaController {
     public void eliminarVenta(@PathVariable Long id) {
         ventaService.eliminarVenta(id);
     }
-
 }

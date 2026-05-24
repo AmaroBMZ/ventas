@@ -31,4 +31,26 @@ public class Venta {
 
     @Column(nullable = true)
     private String estadoVenta;
+
+    @Column(nullable = false)
+    private Long idPerfume;
+
+    @Column(nullable = false)
+    private Long idSucursal;
+
+    public Long getIdPerfume() {
+    return idPerfume;
+}
+
+public void setIdPerfume(Long idPerfume) {
+    this.idPerfume = idPerfume;
+}
+
+public Long getIdSucursal() {
+    return idSucursal;
+}
+
+public void setIdSucursal(Long idSucursal) {
+    this.idSucursal = idSucursal;
+}
 }
