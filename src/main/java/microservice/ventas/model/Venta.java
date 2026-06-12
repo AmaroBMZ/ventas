@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
 import lombok.AllArgsConstructor;
@@ -50,4 +51,9 @@ public class Venta {
     @Column(nullable = false)
     @NotNull(message = "La sucursal es obligatoria")
     private Long idSucursal;
+
+    @Column(nullable = false)
+    @NotNull(message = "La cantidad es obligatoria")
+    @Positive(message = "La cantidad debe ser mayor a cero")
+    private Integer cantidad;
 }

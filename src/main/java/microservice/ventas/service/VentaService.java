@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import microservice.ventas.client.BodegaClient;
+import microservice.ventas.client.InventarioClient;
+import microservice.ventas.dto.DescuentoStockRequest;
 import microservice.ventas.model.Venta;
 import microservice.ventas.repository.VentaRepository;
 
@@ -16,8 +19,14 @@ public class VentaService {
     @Autowired
     private VentaRepository ventaRepository;
 
+    @Autowired
+    private InventarioClient inventarioClient;
 
-        public Venta crearVenta(Venta venta){
+    @Autowired
+    private BodegaClient bodegaClient;
+
+    public Venta crearVenta(Venta venta) {
+        descontarStockEnMicroservicios(venta);
         return ventaRepository.save(venta);
     }
 
@@ -29,13 +38,17 @@ public class VentaService {
     }
 
     public Venta updateVenta(Long id, Venta venta) {
-        Venta ventaExistente = ventaRepository.findById(id).orElse(null);
-        if (ventaExistente != null) {
-            ventaExistente.setFechaVenta(venta.getFechaVenta());
-            ventaExistente.setTotalVenta(venta.getTotalVenta());
-            ventaExistente.setDescuentoVenta(venta.getDescuentoVenta());
-            ventaExistente.setEstadoVenta(venta.getEstadoVenta());
-        }
+        Venta ventaExistente = ventaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+
+        ventaExistente.setFechaVenta(venta.getFechaVenta());
+        ventaExistente.setTotalVenta(venta.getTotalVenta());
+        ventaExistente.setDescuentoVenta(venta.getDescuentoVenta());
+        ventaExistente.setEstadoVenta(venta.getEstadoVenta());
+        ventaExistente.setIdPerfume(venta.getIdPerfume());
+        ventaExistente.setIdSucursal(venta.getIdSucursal());
+        ventaExistente.setCantidad(venta.getCantidad());
+
         return ventaRepository.save(ventaExistente);
     }
 
@@ -49,5 +62,16 @@ public class VentaService {
     return ventaRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
 }
+
+    private void descontarStockEnMicroservicios(Venta venta) {
+        DescuentoStockRequest request = new DescuentoStockRequest(
+                venta.getIdPerfume(),
+                venta.getIdSucursal(),
+                venta.getCantidad(),
+                "VENTA");
+
+        inventarioClient.descontarStock(request);
+        bodegaClient.descontarStock(request);
+    }
 
 }
