@@ -19,7 +19,7 @@ class InventarioClientTest {
 
     @Test
     void descontarStockLlamaEndpointConfigurado() {
-        DescuentoStockRequest request = new DescuentoStockRequest(1L, 1L, 2, "VENTA");
+        DescuentoStockRequest request = new DescuentoStockRequest(1L, 1L, 2L, "VENTA");
 
         inventarioClient.descontarStock(request);
 
@@ -28,7 +28,7 @@ class InventarioClientTest {
 
     @Test
     void descontarStockLanzaExcepcionCuandoInventarioFalla() {
-        DescuentoStockRequest request = new DescuentoStockRequest(1L, 1L, 2, "VENTA");
+        DescuentoStockRequest request = new DescuentoStockRequest(1L, 1L, 2L, "VENTA");
         doThrow(new RestClientException("error")).when(restTemplate).put(URL, request);
 
         assertThrows(IllegalStateException.class, () -> inventarioClient.descontarStock(request));

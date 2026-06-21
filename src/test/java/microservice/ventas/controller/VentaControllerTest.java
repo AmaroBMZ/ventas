@@ -89,7 +89,7 @@ class VentaControllerTest {
         venta.setEstadoVenta("PAGADA");
         venta.setIdPerfume(10L);
         venta.setIdSucursal(20L);
-        venta.setCantidad(2);
+        venta.setCantidad(2L);
         return venta;
     }
 }

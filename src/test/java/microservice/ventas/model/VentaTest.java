@@ -30,12 +30,41 @@ class VentaTest {
     @Test
     void cantidadDebeSerMayorACero() {
         Venta venta = ventaValida();
-        venta.setCantidad(0);
+        venta.setCantidad(0L);
 
         Set<ConstraintViolation<Venta>> errores = validator.validate(venta);
 
         assertEquals(1, errores.size());
         assertEquals("cantidad", errores.iterator().next().getPropertyPath().toString());
+    }
+
+    @Test
+    void camposObligatoriosNoPuedenSerNulosOVacios() {
+        Venta venta = new Venta();
+        venta.setTotalVenta(-1.0);
+        venta.setDescuentoVenta(-1.0);
+        venta.setEstadoVenta("");
+        venta.setCantidad(0L);
+
+        Set<ConstraintViolation<Venta>> errores = validator.validate(venta);
+
+        assertTrue(errores.stream().anyMatch(error -> error.getPropertyPath().toString().equals("fechaVenta")));
+        assertTrue(errores.stream().anyMatch(error -> error.getPropertyPath().toString().equals("totalVenta")));
+        assertTrue(errores.stream().anyMatch(error -> error.getPropertyPath().toString().equals("descuentoVenta")));
+        assertTrue(errores.stream().anyMatch(error -> error.getPropertyPath().toString().equals("estadoVenta")));
+        assertTrue(errores.stream().anyMatch(error -> error.getPropertyPath().toString().equals("idPerfume")));
+        assertTrue(errores.stream().anyMatch(error -> error.getPropertyPath().toString().equals("idSucursal")));
+        assertTrue(errores.stream().anyMatch(error -> error.getPropertyPath().toString().equals("cantidad")));
+    }
+
+    @Test
+    void descuentoPuedeSerNuloPorqueEsOpcional() {
+        Venta venta = ventaValida();
+        venta.setDescuentoVenta(null);
+
+        Set<ConstraintViolation<Venta>> errores = validator.validate(venta);
+
+        assertTrue(errores.isEmpty());
     }
 
     @Test
@@ -48,7 +77,7 @@ class VentaTest {
                 "PAGADA",
                 10L,
                 20L,
-                2);
+                2L);
 
         assertEquals(1L, venta.getIdVenta());
         assertEquals(LocalDate.of(2026, 6, 12), venta.getFechaVenta());
@@ -57,7 +86,7 @@ class VentaTest {
         assertEquals("PAGADA", venta.getEstadoVenta());
         assertEquals(10L, venta.getIdPerfume());
         assertEquals(20L, venta.getIdSucursal());
-        assertEquals(2, venta.getCantidad());
+        assertEquals(2L, venta.getCantidad());
     }
 
     @Test
@@ -71,7 +100,7 @@ class VentaTest {
         venta.setEstadoVenta("PAGADA");
         venta.setIdPerfume(10L);
         venta.setIdSucursal(20L);
-        venta.setCantidad(3);
+        venta.setCantidad(3L);
 
         assertEquals(1L, venta.getIdVenta());
         assertEquals(LocalDate.of(2026, 6, 12), venta.getFechaVenta());
@@ -80,7 +109,7 @@ class VentaTest {
         assertEquals("PAGADA", venta.getEstadoVenta());
         assertEquals(10L, venta.getIdPerfume());
         assertEquals(20L, venta.getIdSucursal());
-        assertEquals(3, venta.getCantidad());
+        assertEquals(3L, venta.getCantidad());
     }
 
     @Test
@@ -106,7 +135,7 @@ class VentaTest {
         venta.setEstadoVenta("PAGADA");
         venta.setIdPerfume(1L);
         venta.setIdSucursal(1L);
-        venta.setCantidad(2);
+        venta.setCantidad(2L);
         return venta;
     }
 }

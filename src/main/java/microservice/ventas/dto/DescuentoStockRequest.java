@@ -11,6 +11,6 @@ public class DescuentoStockRequest {
 
     private Long idProducto;
     private Long idSucursal;
-    private Integer cantidad;
+    private Long cantidad;
     private String motivo;
 }

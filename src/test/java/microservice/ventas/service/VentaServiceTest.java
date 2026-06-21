@@ -164,7 +164,7 @@ class VentaServiceTest {
         Venta existente = ventaValida();
         Venta nueva = ventaValida();
         nueva.setEstadoVenta("ANULADA");
-        nueva.setCantidad(5);
+        nueva.setCantidad(5L);
         when(ventaRepository.findById(1L)).thenReturn(Optional.of(existente));
         when(ventaRepository.save(existente)).thenReturn(existente);
 
@@ -202,7 +202,7 @@ class VentaServiceTest {
         venta.setEstadoVenta("PAGADA");
         venta.setIdPerfume(10L);
         venta.setIdSucursal(20L);
-        venta.setCantidad(2);
+        venta.setCantidad(2L);
         return venta;
     }
 }

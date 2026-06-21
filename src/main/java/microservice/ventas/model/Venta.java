@@ -55,5 +55,5 @@ public class Venta {
     @Column(nullable = false)
     @NotNull(message = "La cantidad es obligatoria")
     @Positive(message = "La cantidad debe ser mayor a cero")
-    private Integer cantidad;
+    private Long cantidad;
 }

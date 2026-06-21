@@ -10,11 +10,11 @@ class DescuentoStockRequestTest {
 
     @Test
     void creaDtoConDatosDeDescuento() {
-        DescuentoStockRequest request = new DescuentoStockRequest(1L, 2L, 3, "VENTA");
+        DescuentoStockRequest request = new DescuentoStockRequest(1L, 2L, 3L, "VENTA");
 
         assertEquals(1L, request.getIdProducto());
         assertEquals(2L, request.getIdSucursal());
-        assertEquals(3, request.getCantidad());
+        assertEquals(3L, request.getCantidad());
         assertEquals("VENTA", request.getMotivo());
     }
 
@@ -24,20 +24,20 @@ class DescuentoStockRequestTest {
 
         request.setIdProducto(10L);
         request.setIdSucursal(20L);
-        request.setCantidad(5);
+        request.setCantidad(5L);
         request.setMotivo("AJUSTE");
 
         assertEquals(10L, request.getIdProducto());
         assertEquals(20L, request.getIdSucursal());
-        assertEquals(5, request.getCantidad());
+        assertEquals(5L, request.getCantidad());
         assertEquals("AJUSTE", request.getMotivo());
     }
 
     @Test
     void metodosGeneradosPorLombokFuncionan() {
-        DescuentoStockRequest request = new DescuentoStockRequest(1L, 2L, 3, "VENTA");
-        DescuentoStockRequest mismoRequest = new DescuentoStockRequest(1L, 2L, 3, "VENTA");
-        DescuentoStockRequest otroRequest = new DescuentoStockRequest(4L, 2L, 3, "VENTA");
+        DescuentoStockRequest request = new DescuentoStockRequest(1L, 2L, 3L, "VENTA");
+        DescuentoStockRequest mismoRequest = new DescuentoStockRequest(1L, 2L, 3L, "VENTA");
+        DescuentoStockRequest otroRequest = new DescuentoStockRequest(4L, 2L, 3L, "VENTA");
 
         assertEquals(request, mismoRequest);
         assertEquals(request.hashCode(), mismoRequest.hashCode());
