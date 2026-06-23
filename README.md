@@ -1,139 +1,60 @@
 # Microservicio Ventas
 
-Microservicio encargado de registrar ventas y coordinar el descuento de stock con los microservicios de Inventario y Bodega mediante `RestTemplate`.
+Ventas registra las ventas realizadas y coordina el descuento de stock con Inventario. Tambien consulta Producto, Perfume y Sucursales para validar que los datos usados en la venta existan.
 
-## Funcionalidad
+## Que gestiona
 
-- Crear ventas.
-- Listar ventas registradas.
-- Buscar una venta por ID.
-- Actualizar ventas.
-- Eliminar ventas.
-- Descontar stock en Inventario al crear una venta.
-- Descontar stock en Bodega al crear una venta.
+- Ventas.
+- Detalles de venta.
+- Calculo de total, descuento e impuestos.
+- Consulta de datos externos para completar informacion de la venta.
+- Descuento de stock al registrar una venta.
+
+## Configuracion local
+
+```properties
+spring.application.name=venta
+server.port=8088
+spring.datasource.url=jdbc:mysql://localhost:3307/venta_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+```
+
+La base usada actualmente es `venta_db`, porque esa es la que ya tiene datos cargados en phpMyAdmin.
+
+## Microservicios que consulta
+
+```properties
+microservices.inventario.descontar-stock-url=http://localhost:8084/api/v1/inventarios/ventas/descontar
+microservices.perfume.obtener-url=http://localhost:8084/api/v1/perfumes/{id}
+microservices.producto.obtener-url=http://localhost:8084/api/v1/productos/{id}
+microservices.producto.disponibilidad-url=http://localhost:8084/api/v1/productos/{id}/disponibilidad
+microservices.sucursal.obtener-url=http://localhost:8083/api/v1/sucursales/{id}
+```
+
+## Endpoints principales
+
+- `POST /api/v1/venta`
+- `POST /api/v1/venta/detalle`
+- `GET /api/v1/venta`
+- `GET /api/v1/venta/{id}`
+- `GET /api/v1/venta/{id}/detalle`
+- `PUT /api/v1/venta/{id}`
+- `DELETE /api/v1/venta/{id}`
 
 ## Flujo al crear una venta
 
-Cuando se registra una venta, el servicio realiza este proceso:
+1. Se reciben los datos de la venta.
+2. Se valida la informacion relacionada, como producto y sucursal.
+3. Se solicita a Inventario descontar el stock.
+4. Si el descuento se realiza bien, la venta queda registrada.
 
-1. Recibe los datos de la venta.
-2. Envia una solicitud al microservicio Inventario para descontar stock.
-3. Envia una solicitud al microservicio Bodega para descontar stock.
-4. Si ambos microservicios responden correctamente, guarda la venta en la base de datos.
-5. Si Inventario o Bodega falla, la venta no se registra.
-
-## Modelo Venta
-
-Campos principales:
-
-- `idVenta`
-- `fechaVenta`
-- `totalVenta`
-- `descuentoVenta`
-- `estadoVenta`
-- `idPerfume`
-- `idSucursal`
-- `cantidad`
-
-## Endpoints
-
-URL base:
-
-```text
-http://localhost:8094/api/v1/venta
-```
-
-### Crear venta
-
-```http
-POST /api/v1/venta
-```
-
-Ejemplo de JSON:
-
-```json
-{
-  "fechaVenta": "2026-06-12",
-  "totalVenta": 59990,
-  "descuentoVenta": 0,
-  "estadoVenta": "PAGADA",
-  "idPerfume": 1,
-  "idSucursal": 1,
-  "cantidad": 2
-}
-```
-
-Al crear la venta, se envia este JSON a Inventario y Bodega:
-
-```json
-{
-  "idProducto": 1,
-  "idSucursal": 1,
-  "cantidad": 2,
-  "motivo": "VENTA"
-}
-```
-
-### Listar ventas
-
-```http
-GET /api/v1/venta
-```
-
-### Buscar venta por ID
-
-```http
-GET /api/v1/venta/{id}
-```
-
-### Actualizar venta
-
-```http
-PUT /api/v1/venta/{id}
-```
-
-### Eliminar venta
-
-```http
-DELETE /api/v1/venta/{id}
-```
-
-## Configuracion de microservicios externos
-
-Las URLs de Inventario y Bodega se configuran en `src/main/resources/application.properties`:
-
-```properties
-microservices.inventario.descontar-stock-url=http://localhost:8092/api/v1/inventario/descontar-stock
-microservices.bodega.descontar-stock-url=http://localhost:8093/api/v1/bodega/descontar-stock
-```
-
-Si los otros microservicios usan puertos o rutas diferentes, se deben modificar esas propiedades.
-
-## Base de datos
-
-Configuracion actual:
-
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/venta_bd
-spring.datasource.username=root
-spring.datasource.password=
-spring.jpa.hibernate.ddl-auto=update
-```
-
-## Ejecutar el proyecto
-
-```bash
-./mvnw spring-boot:run
-```
-
-En Windows:
+## Ejecutar
 
 ```powershell
-.\mvnw.cmd spring-boot:run
+mvn spring-boot:run
 ```
 
-## Compilar
+## Probar
 
 ```powershell
-.\mvnw.cmd -DskipTests package
+mvn test
 ```

@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DescuentoStockRequest {
 
-    private Long idProducto;
-    private Long idSucursal;
-    private Long cantidad;
-    private String motivo;
+    private Long inventarioId;
+    private Long productoId;
+    private Long sucursalId;
+    private Long usuarioId;
+    private Long ventaId;
+    private Integer cantidad;
 }

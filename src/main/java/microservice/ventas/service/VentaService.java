@@ -6,9 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
-import microservice.ventas.client.BodegaClient;
+import microservice.ventas.client.DatosExternosClient;
 import microservice.ventas.client.InventarioClient;
 import microservice.ventas.dto.DescuentoStockRequest;
+import microservice.ventas.dto.VentaDetalleResponse;
 import microservice.ventas.model.Venta;
 import microservice.ventas.repository.VentaRepository;
 
@@ -23,11 +24,16 @@ public class VentaService {
     private InventarioClient inventarioClient;
 
     @Autowired
-    private BodegaClient bodegaClient;
+    private DatosExternosClient datosExternosClient;
 
     public Venta crearVenta(Venta venta) {
         descontarStockEnMicroservicios(venta);
         return ventaRepository.save(venta);
+    }
+
+    public VentaDetalleResponse crearVentaConDetalle(Venta venta) {
+        Venta ventaGuardada = crearVenta(venta);
+        return construirDetalle(ventaGuardada);
     }
 
     public List<Venta> obtenerVenta() {
@@ -63,15 +69,30 @@ public class VentaService {
         .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
 }
 
+    public VentaDetalleResponse obtenerVentaDetalle(Long id) {
+        Venta venta = obtenerVentaPorId(id);
+        return construirDetalle(venta);
+    }
+
     private void descontarStockEnMicroservicios(Venta venta) {
         DescuentoStockRequest request = new DescuentoStockRequest(
+                null,
                 venta.getIdPerfume(),
                 venta.getIdSucursal(),
-                venta.getCantidad(),
-                "VENTA");
+                null,
+                venta.getIdVenta(),
+                venta.getCantidad().intValue());
 
         inventarioClient.descontarStock(request);
-        bodegaClient.descontarStock(request);
+    }
+
+    private VentaDetalleResponse construirDetalle(Venta venta) {
+        return new VentaDetalleResponse(
+                venta,
+                datosExternosClient.obtenerPerfume(venta.getIdPerfume()),
+                datosExternosClient.obtenerProducto(venta.getIdPerfume()),
+                datosExternosClient.obtenerDisponibilidadProducto(venta.getIdPerfume()),
+                datosExternosClient.obtenerSucursal(venta.getIdSucursal()));
     }
 
 }

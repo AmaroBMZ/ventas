@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import microservice.ventas.dto.VentaDetalleResponse;
 import microservice.ventas.model.Venta;
 import microservice.ventas.service.VentaService;
 
@@ -33,6 +34,13 @@ public class VentaController {
         Venta nuevaVenta = ventaService.crearVenta(venta);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaVenta);
     }
+
+    @PostMapping("/detalle")
+    public ResponseEntity<VentaDetalleResponse> crearVentaConDetalle(@Valid @RequestBody Venta venta) {
+        VentaDetalleResponse nuevaVenta = ventaService.crearVentaConDetalle(venta);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaVenta);
+    }
+
     @GetMapping
     public ResponseEntity<List<Venta>> obtenerVentas() {
         List<Venta> ventas = ventaService.obtenerVenta();
@@ -43,6 +51,12 @@ public class VentaController {
     public ResponseEntity<Venta> obtenerVentaPorId(@PathVariable Long id) {
         Venta venta = ventaService.obtenerVentaPorId(id);
 
+        return ResponseEntity.ok(venta);
+    }
+
+    @GetMapping("/{id}/detalle")
+    public ResponseEntity<VentaDetalleResponse> obtenerVentaDetalle(@PathVariable Long id) {
+        VentaDetalleResponse venta = ventaService.obtenerVentaDetalle(id);
         return ResponseEntity.ok(venta);
     }
 

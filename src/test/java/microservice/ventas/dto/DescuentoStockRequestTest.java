@@ -10,34 +10,34 @@ class DescuentoStockRequestTest {
 
     @Test
     void creaDtoConDatosDeDescuento() {
-        DescuentoStockRequest request = new DescuentoStockRequest(1L, 2L, 3L, "VENTA");
+        DescuentoStockRequest request = new DescuentoStockRequest(null, 1L, 2L, null, 99L, 3);
 
-        assertEquals(1L, request.getIdProducto());
-        assertEquals(2L, request.getIdSucursal());
-        assertEquals(3L, request.getCantidad());
-        assertEquals("VENTA", request.getMotivo());
+        assertEquals(1L, request.getProductoId());
+        assertEquals(2L, request.getSucursalId());
+        assertEquals(99L, request.getVentaId());
+        assertEquals(3, request.getCantidad());
     }
 
     @Test
     void settersActualizanDatosDelDto() {
         DescuentoStockRequest request = new DescuentoStockRequest();
 
-        request.setIdProducto(10L);
-        request.setIdSucursal(20L);
-        request.setCantidad(5L);
-        request.setMotivo("AJUSTE");
+        request.setProductoId(10L);
+        request.setSucursalId(20L);
+        request.setVentaId(30L);
+        request.setCantidad(5);
 
-        assertEquals(10L, request.getIdProducto());
-        assertEquals(20L, request.getIdSucursal());
-        assertEquals(5L, request.getCantidad());
-        assertEquals("AJUSTE", request.getMotivo());
+        assertEquals(10L, request.getProductoId());
+        assertEquals(20L, request.getSucursalId());
+        assertEquals(30L, request.getVentaId());
+        assertEquals(5, request.getCantidad());
     }
 
     @Test
     void metodosGeneradosPorLombokFuncionan() {
-        DescuentoStockRequest request = new DescuentoStockRequest(1L, 2L, 3L, "VENTA");
-        DescuentoStockRequest mismoRequest = new DescuentoStockRequest(1L, 2L, 3L, "VENTA");
-        DescuentoStockRequest otroRequest = new DescuentoStockRequest(4L, 2L, 3L, "VENTA");
+        DescuentoStockRequest request = new DescuentoStockRequest(null, 1L, 2L, null, 99L, 3);
+        DescuentoStockRequest mismoRequest = new DescuentoStockRequest(null, 1L, 2L, null, 99L, 3);
+        DescuentoStockRequest otroRequest = new DescuentoStockRequest(null, 4L, 2L, null, 99L, 3);
 
         assertEquals(request, mismoRequest);
         assertEquals(request.hashCode(), mismoRequest.hashCode());

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,12 +17,10 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import microservice.ventas.client.BodegaClient;
 import microservice.ventas.client.InventarioClient;
 import microservice.ventas.dto.DescuentoStockRequest;
 import microservice.ventas.model.Venta;
@@ -38,9 +35,6 @@ class VentaServiceTest {
     @Mock
     private InventarioClient inventarioClient;
 
-    @Mock
-    private BodegaClient bodegaClient;
-
     @InjectMocks
     private VentaService ventaService;
 
@@ -53,10 +47,8 @@ class VentaServiceTest {
 
         assertSame(venta, resultado);
 
-        InOrder orden = inOrder(inventarioClient, bodegaClient, ventaRepository);
-        orden.verify(inventarioClient).descontarStock(any(DescuentoStockRequest.class));
-        orden.verify(bodegaClient).descontarStock(any(DescuentoStockRequest.class));
-        orden.verify(ventaRepository).save(venta);
+        verify(inventarioClient).descontarStock(any(DescuentoStockRequest.class));
+        verify(ventaRepository).save(venta);
     }
 
     @Test
@@ -69,10 +61,9 @@ class VentaServiceTest {
 
         verify(inventarioClient).descontarStock(captor.capture());
         DescuentoStockRequest request = captor.getValue();
-        assertEquals(10L, request.getIdProducto());
-        assertEquals(20L, request.getIdSucursal());
+        assertEquals(10L, request.getProductoId());
+        assertEquals(20L, request.getSucursalId());
         assertEquals(2, request.getCantidad());
-        assertEquals("VENTA", request.getMotivo());
     }
 
     @Test
@@ -84,20 +75,6 @@ class VentaServiceTest {
 
         assertThrows(IllegalStateException.class, () -> ventaService.crearVenta(venta));
 
-        verify(bodegaClient, never()).descontarStock(any(DescuentoStockRequest.class));
-        verify(ventaRepository, never()).save(any(Venta.class));
-    }
-
-    @Test
-    void crearVentaNoGuardaSiBodegaFalla() {
-        Venta venta = ventaValida();
-        org.mockito.Mockito.doThrow(new IllegalStateException("sin stock en bodega"))
-                .when(bodegaClient)
-                .descontarStock(any(DescuentoStockRequest.class));
-
-        assertThrows(IllegalStateException.class, () -> ventaService.crearVenta(venta));
-
-        verify(inventarioClient).descontarStock(any(DescuentoStockRequest.class));
         verify(ventaRepository, never()).save(any(Venta.class));
     }
 

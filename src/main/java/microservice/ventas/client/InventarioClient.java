@@ -22,7 +22,7 @@ public class InventarioClient {
 
     public void descontarStock(DescuentoStockRequest request) {
         try {
-            restTemplate.put(descontarStockUrl, request);
+            restTemplate.postForEntity(descontarStockUrl, request, Void.class);
         } catch (RestClientException ex) {
             throw new IllegalStateException("No se pudo descontar stock en inventario", ex);
         }
