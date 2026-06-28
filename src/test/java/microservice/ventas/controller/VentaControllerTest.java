@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import microservice.ventas.dto.VentaDetalleResponse;
 import microservice.ventas.model.Venta;
 import microservice.ventas.service.VentaService;
 
@@ -39,6 +41,18 @@ class VentaControllerTest {
     }
 
     @Test
+    void crearVentaConDetalleRetornaCreated() {
+        Venta venta = ventaValida();
+        VentaDetalleResponse detalle = detalleValido(venta);
+        when(ventaService.crearVentaConDetalle(venta)).thenReturn(detalle);
+
+        ResponseEntity<VentaDetalleResponse> respuesta = ventaController.crearVentaConDetalle(venta);
+
+        assertEquals(HttpStatus.CREATED, respuesta.getStatusCode());
+        assertSame(detalle, respuesta.getBody());
+    }
+
+    @Test
     void obtenerVentasRetornaLista() {
         Venta venta = ventaValida();
         when(ventaService.obtenerVenta()).thenReturn(List.of(venta));
@@ -58,6 +72,18 @@ class VentaControllerTest {
 
         assertEquals(HttpStatus.OK, respuesta.getStatusCode());
         assertSame(venta, respuesta.getBody());
+    }
+
+    @Test
+    void obtenerVentaDetalleRetornaDetalle() {
+        Venta venta = ventaValida();
+        VentaDetalleResponse detalle = detalleValido(venta);
+        when(ventaService.obtenerVentaDetalle(1L)).thenReturn(detalle);
+
+        ResponseEntity<VentaDetalleResponse> respuesta = ventaController.obtenerVentaDetalle(1L);
+
+        assertEquals(HttpStatus.OK, respuesta.getStatusCode());
+        assertSame(detalle, respuesta.getBody());
     }
 
     @Test
@@ -91,5 +117,14 @@ class VentaControllerTest {
         venta.setIdSucursal(20L);
         venta.setCantidad(2L);
         return venta;
+    }
+
+    private VentaDetalleResponse detalleValido(Venta venta) {
+        return new VentaDetalleResponse(
+                venta,
+                Map.of("id", venta.getIdPerfume()),
+                Map.of("id", venta.getIdPerfume()),
+                Map.of("stock", 5),
+                Map.of("id", venta.getIdSucursal()));
     }
 }

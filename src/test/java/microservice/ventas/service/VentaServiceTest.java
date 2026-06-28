@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -21,8 +22,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import microservice.ventas.client.DatosExternosClient;
 import microservice.ventas.client.InventarioClient;
 import microservice.ventas.dto.DescuentoStockRequest;
+import microservice.ventas.dto.VentaDetalleResponse;
 import microservice.ventas.model.Venta;
 import microservice.ventas.repository.VentaRepository;
 
@@ -34,6 +37,9 @@ class VentaServiceTest {
 
     @Mock
     private InventarioClient inventarioClient;
+
+    @Mock
+    private DatosExternosClient datosExternosClient;
 
     @InjectMocks
     private VentaService ventaService;
@@ -76,6 +82,30 @@ class VentaServiceTest {
         assertThrows(IllegalStateException.class, () -> ventaService.crearVenta(venta));
 
         verify(ventaRepository, never()).save(any(Venta.class));
+    }
+
+    @Test
+    void crearVentaConDetalleGuardaYRetornaDatosExternos() {
+        Venta venta = ventaValida();
+        Map<String, Object> perfume = Map.of("id", 10L, "nombre", "Ambar");
+        Map<String, Object> producto = Map.of("id", 10L, "precio", 59990);
+        Map<String, Object> disponibilidad = Map.of("stock", 8);
+        Map<String, Object> sucursal = Map.of("id", 20L, "nombre", "Centro");
+        when(ventaRepository.save(venta)).thenReturn(venta);
+        when(datosExternosClient.obtenerPerfume(10L)).thenReturn(perfume);
+        when(datosExternosClient.obtenerProducto(10L)).thenReturn(producto);
+        when(datosExternosClient.obtenerDisponibilidadProducto(10L)).thenReturn(disponibilidad);
+        when(datosExternosClient.obtenerSucursal(20L)).thenReturn(sucursal);
+
+        VentaDetalleResponse resultado = ventaService.crearVentaConDetalle(venta);
+
+        assertSame(venta, resultado.getVenta());
+        assertSame(perfume, resultado.getPerfume());
+        assertSame(producto, resultado.getProducto());
+        assertSame(disponibilidad, resultado.getDisponibilidadProducto());
+        assertSame(sucursal, resultado.getSucursal());
+        verify(inventarioClient).descontarStock(any(DescuentoStockRequest.class));
+        verify(ventaRepository).save(venta);
     }
 
     @Test
@@ -134,6 +164,28 @@ class VentaServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> ventaService.obtenerVentaPorId(99L));
 
         assertEquals("Venta no encontrada", exception.getMessage());
+    }
+
+    @Test
+    void obtenerVentaDetalleRetornaVentaConDatosExternos() {
+        Venta venta = ventaValida();
+        Map<String, Object> perfume = Map.of("id", 10L);
+        Map<String, Object> producto = Map.of("id", 10L);
+        Map<String, Object> disponibilidad = Map.of("disponible", true);
+        Map<String, Object> sucursal = Map.of("id", 20L);
+        when(ventaRepository.findById(1L)).thenReturn(Optional.of(venta));
+        when(datosExternosClient.obtenerPerfume(10L)).thenReturn(perfume);
+        when(datosExternosClient.obtenerProducto(10L)).thenReturn(producto);
+        when(datosExternosClient.obtenerDisponibilidadProducto(10L)).thenReturn(disponibilidad);
+        when(datosExternosClient.obtenerSucursal(20L)).thenReturn(sucursal);
+
+        VentaDetalleResponse resultado = ventaService.obtenerVentaDetalle(1L);
+
+        assertSame(venta, resultado.getVenta());
+        assertSame(perfume, resultado.getPerfume());
+        assertSame(producto, resultado.getProducto());
+        assertSame(disponibilidad, resultado.getDisponibilidadProducto());
+        assertSame(sucursal, resultado.getSucursal());
     }
 
     @Test
